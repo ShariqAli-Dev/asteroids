@@ -67,36 +67,63 @@ int main(void)
 // module functions declaration (local)
 // ---------------
 void UnloadGame(void) {}
-void InitGame(void) {}
+
+void InitGame(void)
+{
+    victory = false;
+}
+
 void UpdateGame(void)
 {
-    if (gameOver)
+    if (!gameOver)
+    {
+        if (IsKeyPressed('P'))
+        {
+            pause = !pause;
+        }
+
+        if (IsKeyPressed('X'))
+        {
+            InitGame();
+            gameOver = true;
+        }
+        if (IsKeyPressed('W'))
+        {
+            InitGame();
+            victory = true;
+        }
+    }
+    else
     {
         if (IsKeyPressed(KEY_ENTER))
         {
             InitGame();
             gameOver = false;
         }
-    }
-    else
-    {
+        return;
     }
 }
+
 void DrawGame(void)
 {
     BeginDrawing();
     ClearBackground(RAYWHITE);
-    if (gameOver)
+    if (!gameOver)
     {
-        DrawText("PRESS [ENTER] TO PLAY AGAIN", GetScreenWidth() / 2 - MeasureText("PRESS [ENTER] TO PLAY AGAIN", 20) / 2, GetScreenHeight() / 2 - 50, 20, GRAY);
+        if (victory)
+            DrawText("VICTORY", screenWidth / 2 - MeasureText("VICTORY", 20) / 2, screenHeight / 2, 20, LIGHTGRAY);
+
+        if (pause)
+            DrawText("GAME PAUSED", screenWidth / 2 - MeasureText("GAME PAUSED", 40) / 2, screenHeight / 2 - 40, 40, GRAY);
+        DrawText("[W] to win, [X] to lose", GetScreenWidth() / 2 - MeasureText("WOO, FUN GAME ", 20) / 2, GetScreenHeight() / 2 - 50, 20, GRAY);
     }
     else
     {
-
-        DrawText("TEMP TEXT", GetScreenWidth() / 2 - MeasureText("temp tetx ", 20) / 2, GetScreenHeight() / 2 - 50, 20, GRAY);
+        DrawText("PRESS [ENTER] TO PLAY AGAIN", GetScreenWidth() / 2 - MeasureText("PRESS [ENTER] TO PLAY AGAIN", 20) / 2, GetScreenHeight() / 2 - 50, 20, GRAY);
     }
     EndDrawing();
 }
+
 void UpdateDrawFrame(void)
 {
     UpdateGame();
