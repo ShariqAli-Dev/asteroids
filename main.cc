@@ -1,132 +1,104 @@
 #include "raylib.h"
-#include <stdlib.h>
-#include <stdio.h>
+#include <math.h>
+// https://github.com/raysan5/raylib-games/blob/master/classics/src/asteroids.c
 
-// Types and Structures Definition
+// ---------------
+// defines
+// ---------------
+#define PLAYER_BASE_SIZE 20.0f
+#define PLAYER_SPEED 6.0f
+#define PLAYER_MAX_SHOOTS 10
+
+#define METEORS_SPEED 2
+#define MAX_BIG_METEORS 4
+#define MAX_MEDIUM_METEORS 8
+#define MAX_SMALL_METEORS 16
+
+// ---------------
+// types and struct definition
+// ---------------
 typedef enum GameScreen
 {
-    LOGO = 0,
-    TITLE,
-    GAMEPLAY,
-    ENDING
+    SCREEN_TITLE = 0,
+    SCREEN_GAME,
 } GameScreen;
 
-// Program main entry point
+// ---------------
+// global variable declaration
+// ---------------
+static const unsigned int screenWidth = 800;
+static const unsigned int screenHeight = 450;
+
+static bool gameOver = false;
+static bool pause = false;
+static bool victory = false;
+
+static float shipHeight = 0.0f;
+
+// ---------------
+// module functions declaration (local)
+// ---------------
+static void InitGame(void);
+static void UpdateGame(void); // update 1 frame
+static void DrawGame(void);   // draw 1 frame
+static void UnloadGame(void);
+static void UpdateDrawFrame(void); // update and draw 1 frame
+
+// ---------------
+// program entry point
+// ---------------
 int main(void)
 {
-    // Initialization
-    const int screenWidth = 800;
-    const int screenHeight = 450;
-
-    InitWindow(screenWidth, screenHeight, "raylib [core] example - basic screen manager");
-
-    GameScreen currentScreen = LOGO;
-
-    // TODO: Initialize all required variables and load all required data here!
-    unsigned int framesCounter = 0; // Useful to count frames
+    InitWindow(screenWidth, screenHeight, "Asteroids");
+    // InitGame();
     SetTargetFPS(60);
 
-    // Main game loop
     while (!WindowShouldClose())
     {
-        switch (currentScreen)
-        {
-        case LOGO:
-        {
-            framesCounter++;
-            if (framesCounter > 120)
-            {
-                currentScreen = TITLE;
-            }
-        }
-        break;
-        case TITLE:
-        {
-            // TODO: Update TITLE screen variables here!
-
-            // Press enter to change to GAMEPLAY screen
-            if (IsKeyPressed(KEY_ENTER) || IsGestureDetected(GESTURE_TAP))
-            {
-                currentScreen = GAMEPLAY;
-            }
-        }
-        break;
-        case GAMEPLAY:
-        {
-            // TODO: Update GAMEPLAY screen variables here!
-
-            // Press enter to change to ENDING screen
-            if (IsKeyPressed(KEY_ENTER) || IsGestureDetected(GESTURE_TAP))
-            {
-                currentScreen = ENDING;
-            }
-        }
-        break;
-        case ENDING:
-        {
-            // TODO: Update ENDING screen variables here!
-
-            // Press enter to return to TITLE screen
-            if (IsKeyPressed(KEY_ENTER) || IsGestureDetected(GESTURE_TAP))
-            {
-                currentScreen = TITLE;
-            }
-        }
-        break;
-        default:
-            break;
-        }
-
-        // Draw
-        BeginDrawing();
-        ClearBackground(RAYWHITE);
-
-        switch (currentScreen)
-        {
-        case LOGO:
-        {
-            // TODO: Draw LOGO screen here!
-            DrawText("LOGO SCREEN", 20, 20, 40, LIGHTGRAY);
-            DrawText("WAIT for 2 SECONDS...", 290, 220, 20, GRAY);
-        }
-        break;
-        case TITLE:
-        {
-            // TODO: Draw TITLE screen here!
-            DrawRectangle(0, 0, screenWidth, screenHeight, GREEN);
-            DrawText("TITLE SCREEN", 20, 20, 40, DARKGREEN);
-            DrawText("PRESS ENTER or TAP to JUMP to GAMEPLAY SCREEN", 120, 220, 20, DARKGREEN);
-        }
-        break;
-        case GAMEPLAY:
-        {
-            // TODO: Draw GAMEPLAY screen here!
-            DrawRectangle(0, 0, screenWidth, screenHeight, PURPLE);
-            DrawText("GAMEPLAY SCREEN", 20, 20, 40, MAROON);
-            DrawText("PRESS ENTER or TAP to JUMP to ENDING SCREEN", 130, 220, 20, MAROON);
-        }
-        break;
-        case ENDING:
-        {
-            // TODO: Draw ENDING screen here!
-            DrawRectangle(0, 0, screenWidth, screenHeight, BLUE);
-            DrawText("ENDING SCREEN", 20, 20, 40, DARKBLUE);
-            DrawText("PRESS ENTER or TAP to RETURN to TITLE SCREEN", 120, 220, 20, DARKBLUE);
-        }
-        break;
-        default:
-            break;
-        }
-        DrawFPS(GetScreenWidth() - 95, 10);
-        EndDrawing();
+        UpdateDrawFrame();
     }
 
-    // De-Initialization
-
-    // TODO: Unload all loaded data (textures, fonts, audio) here!
-
-    CloseWindow(); // Close window and OpenGL context
-    //--------------------------------------------------------------------------------------
-
+    UnloadGame();
+    CloseWindow();
     return 0;
 }
+
+// ---------------
+// module functions declaration (local)
+// ---------------
+void UnloadGame(void) {}
+void InitGame(void) {}
+void UpdateGame(void)
+{
+    if (gameOver)
+    {
+        if (IsKeyPressed(KEY_ENTER))
+        {
+            InitGame();
+            gameOver = false;
+        }
+    }
+    else
+    {
+    }
+}
+void DrawGame(void)
+{
+    BeginDrawing();
+    ClearBackground(RAYWHITE);
+    if (gameOver)
+    {
+        DrawText("PRESS [ENTER] TO PLAY AGAIN", GetScreenWidth() / 2 - MeasureText("PRESS [ENTER] TO PLAY AGAIN", 20) / 2, GetScreenHeight() / 2 - 50, 20, GRAY);
+    }
+    else
+    {
+
+        DrawText("TEMP TEXT", GetScreenWidth() / 2 - MeasureText("temp tetx ", 20) / 2, GetScreenHeight() / 2 - 50, 20, GRAY);
+    }
+    EndDrawing();
+}
+void UpdateDrawFrame(void)
+{
+    UpdateGame();
+    DrawGame();
+};
