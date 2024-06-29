@@ -23,6 +23,27 @@ typedef enum GameScreen
     SCREEN_GAME,
 } GameScreen;
 
+typedef struct Player
+{
+    Vector2 position;
+    Vector2 speed;
+    float acceleration;
+    float rotation;
+    Vector3 collider;
+    Color color;
+} Player;
+
+// typedef struct Shoot
+// {
+//     Vector2 position;
+//     Vector2 speed;
+//     float radius;
+//     float rotation;
+//     int lifeSpawnn;
+//     bool active;
+//     Color color;
+// } Shoot;
+
 // ---------------
 // global variable declaration
 // ---------------
@@ -34,6 +55,9 @@ static bool pause = false;
 static bool victory = false;
 
 static float shipHeight = 0.0f;
+
+static Player player = {0};
+// static Shoot shoot[PLAYER_MAX_SHOOTS] = {0};
 
 // ---------------
 // module functions declaration (local)
@@ -50,7 +74,7 @@ static void UpdateDrawFrame(void); // update and draw 1 frame
 int main(void)
 {
     InitWindow(screenWidth, screenHeight, "Asteroids");
-    // InitGame();
+    InitGame();
     SetTargetFPS(60);
 
     while (!WindowShouldClose())
@@ -71,6 +95,20 @@ void UnloadGame(void) {}
 void InitGame(void)
 {
     victory = false;
+    pause = false;
+
+    shipHeight = (PLAYER_BASE_SIZE / 2) / tanf(20 * DEG2RAD);
+
+    // init the player
+    player.position = (Vector2){screenWidth / 2, screenHeight / 2 - shipHeight / 2};
+    player.speed = (Vector2){0, 0};
+    player.acceleration = 0;
+    player.rotation = 0;
+    player.collider = (Vector3){
+        player.position.x + sin(player.rotation * DEG2RAD) * (shipHeight / 2.5f),
+        player.position.y - cos(player.rotation * DEG2RAD) * (shipHeight / 2.5f),
+        12};
+    player.color = LIGHTGRAY;
 }
 
 void UpdateGame(void)
@@ -80,6 +118,9 @@ void UpdateGame(void)
         if (IsKeyPressed('P'))
         {
             pause = !pause;
+        }
+        if (!pause)
+        {
         }
 
         if (IsKeyPressed('X'))
@@ -110,12 +151,17 @@ void DrawGame(void)
     ClearBackground(RAYWHITE);
     if (!gameOver)
     {
+        // draw spaceship
+        Vector2 v1 = {player.position.x + sinf(player.rotation * DEG2RAD) * (shipHeight), player.position.y - cosf(player.rotation * DEG2RAD) * (shipHeight)};
+        Vector2 v2 = {player.position.x - cosf(player.rotation * DEG2RAD) * (PLAYER_BASE_SIZE / 2), player.position.y - sinf(player.rotation * DEG2RAD) * (PLAYER_BASE_SIZE / 2)};
+        Vector2 v3 = {player.position.x + cosf(player.rotation * DEG2RAD) * (PLAYER_BASE_SIZE / 2), player.position.y + sinf(player.rotation * DEG2RAD) * (PLAYER_BASE_SIZE / 2)};
+        DrawTriangle(v1, v2, v3, MAROON);
+
         if (victory)
             DrawText("VICTORY", screenWidth / 2 - MeasureText("VICTORY", 20) / 2, screenHeight / 2, 20, LIGHTGRAY);
 
         if (pause)
             DrawText("GAME PAUSED", screenWidth / 2 - MeasureText("GAME PAUSED", 40) / 2, screenHeight / 2 - 40, 40, GRAY);
-        DrawText("[W] to win, [X] to lose", GetScreenWidth() / 2 - MeasureText("WOO, FUN GAME ", 20) / 2, GetScreenHeight() / 2 - 50, 20, GRAY);
     }
     else
     {
@@ -129,3 +175,13 @@ void UpdateDrawFrame(void)
     UpdateGame();
     DrawGame();
 };
+
+/* steps
+make the screen states
+draw the player
+add movement
+add shooting
+add asteroids
+add collision
+add breaking of asteroids
+*/
