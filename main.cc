@@ -34,16 +34,16 @@ typedef struct Player
     Color color;
 } Player;
 
-// typedef struct Shoot
-// {
-//     Vector2 position;
-//     Vector2 speed;
-//     float radius;
-//     float rotation;
-//     int lifeSpawnn;
-//     bool active;
-//     Color color;
-// } Shoot;
+typedef struct Shoot
+{
+    Vector2 position;
+    Vector2 speed;
+    float radius;
+    float rotation;
+    int lifeSpawn;
+    bool active;
+    Color color;
+} Shoot;
 
 // ---------------
 // global variable declaration
@@ -58,7 +58,7 @@ static bool victory = false;
 static float shipHeight = 0.0f;
 
 static Player player = {0};
-// static Shoot shoot[PLAYER_MAX_SHOOTS] = {0};
+static Shoot shoot[PLAYER_MAX_SHOOTS] = {0};
 
 // ---------------
 // module functions declaration (local)
@@ -95,8 +95,6 @@ void UnloadGame(void) {}
 
 void InitGame(void)
 {
-    int posX, posY;
-    int velX, velY;
     victory = false;
     pause = false;
 
@@ -112,6 +110,17 @@ void InitGame(void)
         player.position.y - cos(player.rotation * DEG2RAD) * (shipHeight / 2.5f),
         12};
     player.color = LIGHTGRAY;
+
+    // init shoot
+    for (int i = 0; i < PLAYER_MAX_SHOOTS; i++)
+    {
+        shoot[i].position = (Vector2){0, 0};
+        shoot[i].speed = (Vector2){0, 0};
+        shoot[i].radius = 2;
+        shoot[i].active = false;
+        shoot[i].lifeSpawn = 0;
+        shoot[i].color = WHITE;
+    }
 }
 
 void UpdateGame(void)
@@ -160,8 +169,52 @@ void UpdateGame(void)
             // player movement
             player.position.x += (player.speed.x * player.acceleration);
             player.position.y -= (player.speed.y * player.acceleration);
-        }
 
+            // player shoot logic
+            // Player shoot logic
+            if (IsKeyPressed(KEY_SPACE))
+            {
+                for (int i = 0; i < PLAYER_MAX_SHOOTS; i++)
+                {
+                    if (!shoot[i].active)
+                    {
+                        shoot[i].position = (Vector2){player.position.x + sin(player.rotation * DEG2RAD) * (shipHeight), player.position.y - cos(player.rotation * DEG2RAD) * (shipHeight)};
+                        shoot[i].active = true;
+                        shoot[i].speed.x = 1.5 * sin(player.rotation * DEG2RAD) * PLAYER_SPEED;
+                        shoot[i].speed.y = 1.5 * cos(player.rotation * DEG2RAD) * PLAYER_SPEED;
+                        shoot[i].rotation = player.rotation;
+                        break;
+                    }
+                }
+            }
+
+            // Shoot life timer
+            for (int i = 0; i < PLAYER_MAX_SHOOTS; i++)
+            {
+                if (shoot[i].active)
+                    shoot[i].lifeSpawn++;
+            }
+
+            // Shot logic
+            for (int i = 0; i < PLAYER_MAX_SHOOTS; i++)
+            {
+                if (shoot[i].active)
+                {
+                    // Movement
+                    shoot[i].position.x += shoot[i].speed.x;
+                    shoot[i].position.y -= shoot[i].speed.y;
+
+                    // Life of shoot
+                    if (shoot[i].lifeSpawn >= 60)
+                    {
+                        shoot[i].position = (Vector2){0, 0};
+                        shoot[i].speed = (Vector2){0, 0};
+                        shoot[i].lifeSpawn = 0;
+                        shoot[i].active = false;
+                    }
+                }
+            }
+        }
         if (IsKeyPressed('X'))
         {
             InitGame();
@@ -195,6 +248,13 @@ void DrawGame(void)
         Vector2 v2 = {player.position.x - cosf(player.rotation * DEG2RAD) * (PLAYER_BASE_SIZE / 2), player.position.y - sinf(player.rotation * DEG2RAD) * (PLAYER_BASE_SIZE / 2)};
         Vector2 v3 = {player.position.x + cosf(player.rotation * DEG2RAD) * (PLAYER_BASE_SIZE / 2), player.position.y + sinf(player.rotation * DEG2RAD) * (PLAYER_BASE_SIZE / 2)};
         DrawTriangle(v1, v2, v3, MAROON);
+
+        //  draw shoot
+        for (int i = 0; i < PLAYER_MAX_SHOOTS; i++)
+        {
+            if (shoot[i].active)
+                DrawCircleV(shoot[i].position, shoot[i].radius, BLACK);
+        }
 
         if (victory)
             DrawText("VICTORY", screenWidth / 2 - MeasureText("VICTORY", 20) / 2, screenHeight / 2, 20, LIGHTGRAY);
