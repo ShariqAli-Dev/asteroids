@@ -1,5 +1,6 @@
 #include "raylib.h"
 #include <math.h>
+#include <stdio.h>
 // https://github.com/raysan5/raylib-games/blob/master/classics/src/asteroids.c
 
 // ---------------
@@ -94,6 +95,8 @@ void UnloadGame(void) {}
 
 void InitGame(void)
 {
+    int posX, posY;
+    int velX, velY;
     victory = false;
     pause = false;
 
@@ -121,6 +124,42 @@ void UpdateGame(void)
         }
         if (!pause)
         {
+            // rotation
+            if (IsKeyDown(KEY_LEFT))
+            {
+                player.rotation -= 5;
+            }
+            if (IsKeyDown(KEY_RIGHT))
+            {
+                player.rotation += 5;
+            }
+            // player speed
+            player.speed.x = sin(player.rotation * DEG2RAD) * PLAYER_SPEED;
+            player.speed.y = cos(player.rotation * DEG2RAD) * PLAYER_SPEED;
+            // player acceleration
+            if (IsKeyDown(KEY_UP))
+            {
+                if (player.acceleration < 1)
+                    player.acceleration += 0.04f;
+            }
+            else
+            {
+                if (player.acceleration > 0)
+                    player.acceleration -= 0.02f;
+                else if (player.acceleration < 0)
+                    player.acceleration = 0;
+            }
+            if (IsKeyDown(KEY_DOWN))
+            {
+                if (player.acceleration > 0)
+                    player.acceleration -= 0.04f;
+                else if (player.acceleration < 0)
+                    player.acceleration = 0;
+            }
+
+            // player movement
+            player.position.x += (player.speed.x * player.acceleration);
+            player.position.y -= (player.speed.y * player.acceleration);
         }
 
         if (IsKeyPressed('X'))
